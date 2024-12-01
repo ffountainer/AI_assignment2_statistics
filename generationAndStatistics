@@ -1,0 +1,779 @@
+package org.example;
+import org.knowm.xchart.XChartPanel;
+import org.knowm.xchart.XYChart;
+import org.knowm.xchart.XYChartBuilder;
+import javax.swing.*;
+import java.sql.SQLOutput;
+import java.util.*;
+// packages for the graph
+
+public class Main {
+    public static void main(String[] args) {
+
+        // PARAMETERS that can be changed
+        int populationSize = 500;
+        int badLimit = 5;
+        int fitnessToChangeTheNumberOfMutations = 5;
+        int numberOfMutationsWithGoodFitness = 1;
+        Integer maxValue = 400;
+
+        Scanner scanner = new Scanner(System.in);
+
+        // generating tests and running them
+
+        int[] averageFitness = new int[5];
+        int[] bestFitness = new int[5];
+        int[] iterationGlobal = new int[5];
+
+        // NUMBER OF TESTS FOR EACH COMPLEXITY
+        int tests = 10;
+
+        int globalCounter = 0;
+        for (int e = 20; e <= 40; e += 5) {
+            Integer averageFit = 0;
+            Integer globalBest = -1000000;
+            Integer numOfIterations = 0;
+            for (int q = 0; q < tests; q += 1) {
+
+                boolean test = true;
+                while (test) {
+                    // generate the test
+
+                    // basic solution that will be randomly swapped
+                    String[][] basicSudoku = {
+                            {"1", "8", "5", "4", "3", "6", "2", "9", "7"},
+                            {"4", "3", "7", "5", "9", "2", "8", "1", "6"},
+                            {"6", "9", "2", "8", "1", "7", "3", "4", "5"},
+                            {"3", "7", "6", "2", "8", "9", "4", "5", "1"},
+                            {"2", "1", "4", "3", "7", "5", "9", "6", "8"},
+                            {"9", "5", "8", "6", "4", "1", "7", "3", "2"},
+                            {"8", "6", "3", "1", "2", "4", "5", "7", "9"},
+                            {"7", "2", "1", "9", "5", "3", "6", "8", "4"},
+                            {"5", "4", "9", "7", "6", "8", "1", "2", "3"}
+                    };
+
+
+                    Integer globalIterations = 0;
+
+                    Random rand = new Random();
+                    String[][] sudoku = new String[9][9];
+                    for (int l = 0; l < 9; l ++) {
+                        for (int d = 0; d < 9; d++) {
+                            sudoku[l][d] = basicSudoku[l][d];
+                        }
+                    }
+
+                    int[][] dummyFixed = new int[9][9];
+                    for (int i = 0; i < 9; i++) {
+                        for (int j = 0; j < 9; j++) {
+                            dummyFixed[i][j] = 0;
+                        }
+                    }
+                    for (int i = 0; i < 30; i++) {
+                        boolean flag = true;
+                        int whatChanges = rand.nextInt(5);
+
+                        // if we just transpose the matrix
+                        if (whatChanges == 0) {
+                            String[][] testing = new String[9][9];
+                            for (int l = 0; l < 9; l++) {
+                                for (int d = 0; d < 9; d++) {
+                                    testing[l][d] = sudoku[d][l];
+                                }
+                            }
+                        }
+                        // if we are exchanging rows
+                        if (whatChanges == 1) {
+                            int whatPart = rand.nextInt(2);
+                            int row1 = 0;
+                            int row2 = 0;
+                            if (whatPart == 0) {
+                                row1 = rand.nextInt(3);
+                                row2 = rand.nextInt(3);
+                                while (row2 == row1) {
+                                    row2 = rand.nextInt(3);
+                                }
+                            }
+                            if (whatPart == 1) {
+                                row1 = rand.nextInt(3) + 3;
+                                row2 = rand.nextInt(3) + 3;
+                                while (row2 == row1) {
+                                    row2 = rand.nextInt(3) + 3;
+                                }
+                            }
+                            if (whatPart == 2) {
+                                row1 = rand.nextInt(3) + 6;
+                                row2 = rand.nextInt(3) + 6;
+                                while (row2 == row1) {
+                                    row2 = rand.nextInt(3) + 6;
+                                }
+                            }
+
+                            String[] change = new String[9];
+                            for (int k = 0; k < 9; k++) {
+                                change[k] = sudoku[row1][k];
+                            }
+
+                            for (int k = 0; k < 9; k++) {
+                                sudoku[row1][k] = sudoku[row2][k];
+                            }
+
+                            for (int k = 0; k < 9; k++) {
+                                sudoku[row2][k] = change[k];
+                            }
+
+                        }
+
+                        // if we are exchanging columns
+                        if (whatChanges == 2) {
+                            int whatPart = rand.nextInt(2);
+                            int column1 = 0;
+                            int column2 = 0;
+                            if (whatPart == 0) {
+                                column1 = rand.nextInt(3);
+                                column2 = rand.nextInt(3);
+                                while (column2 == column1) {
+                                    column2 = rand.nextInt(3);
+                                }
+                            }
+                            if (whatPart == 1) {
+                                column1 = rand.nextInt(3) + 3;
+                                column2 = rand.nextInt(3) + 3;
+                                while (column2 == column1) {
+                                    column2 = rand.nextInt(3) + 3;
+                                }
+                            }
+                            if (whatPart == 2) {
+                                column1 = rand.nextInt(3) + 6;
+                                column2 = rand.nextInt(3) + 6;
+                                while (column2 == column1) {
+                                    column2 = rand.nextInt(3) + 6;
+                                }
+                            }
+
+                            String[] change = new String[9];
+                            for (int k = 0; k < 9; k++) {
+                                change[k] = sudoku[k][column1];
+                            }
+
+                            for (int k = 0; k < 9; k++) {
+                                sudoku[k][column1] = sudoku[k][column2];
+                            }
+
+                            for (int k = 0; k < 9; k++) {
+                                sudoku[k][column2] = change[k];
+                            }
+
+                        }
+
+                        // if we are exchanging the row segments
+                        if (whatChanges == 3) {
+                            int firstSegment = rand.nextInt(2);
+                            int secondSegment = rand.nextInt(2);
+                            while (secondSegment == firstSegment) {
+                                secondSegment = rand.nextInt(2);
+                            }
+                            String[][] change = new String[3][9];
+                            for (int k = 0; k < 3; k++) {
+                                for (int l = 0; l < 9; l++) {
+                                    change[k][l] = sudoku[(firstSegment*3+k)][l];
+                                }
+                            }
+
+                            for (int k = 0; k < 3; k++) {
+                                for (int l = 0; l < 9; l++) {
+                                    sudoku[(firstSegment*3+k)][l] = sudoku[(secondSegment*3+k)][l];
+                                }
+                            }
+
+                            for (int k = 0; k < 3; k++) {
+                                for (int l = 0; l < 9; l++) {
+                                    sudoku[(secondSegment*3+k)][l] = change[k][l];
+                                }
+                            }
+
+                        }
+
+                        // if we are exchanging the column segments
+                        if (whatChanges == 4) {
+                            int firstSegment = rand.nextInt(2);
+                            int secondSegment = rand.nextInt(2);
+                            while (secondSegment == firstSegment) {
+                                secondSegment = rand.nextInt(2);
+                            }
+                            String[][] change = new String[9][3];
+                            for (int k = 0; k < 9; k++) {
+                                for (int l = 0; l < 3; l++) {
+                                    change[k][l] = sudoku[k][(firstSegment*3+l)];
+                                }
+                            }
+
+                            for (int k = 0; k < 9; k++) {
+                                for (int l = 0; l < 3; l++) {
+                                    sudoku[k][(firstSegment*3+l)] = sudoku[k][(secondSegment*3+l)];
+                                }
+                            }
+
+                            for (int k = 0; k < 9; k++) {
+                                for (int l = 0; l < 3; l++) {
+                                    sudoku[k][(secondSegment*3+l)] = change[k][l];
+                                }
+                            }
+
+                        }
+
+
+                    }
+
+                    for (int i = 0; i < (81 - e); i++) {
+                        int index1 = rand.nextInt(9);
+                        int index2 = rand.nextInt(9);
+                        sudoku[index1][index2] = "-";
+                    }
+
+                    int[][] fixed = new int[9][9];
+                    for (int i = 0; i < 9; i++) {
+                        for (int j = 0; j < 9; j++) {
+                            if (!sudoku[i][j].equals("-")) {
+                                fixed[i][j] = 1;
+                            }
+                            else {
+                                fixed[i][j] = 0;
+                            }
+                        }
+                    }
+
+
+                    // build the initial population
+                    // it is build with the right subgrids and random rows/columns
+                    String[][][] population = new String[populationSize][9][9];
+                    for (int i = 0; i < populationSize; i++) {
+                        String[][] matrix = new String[9][9];
+                        for (int j = 0; j < 3; j++) {
+                            for (int t = 0; t < 3; t++) {
+                                String nums = "";
+                                for (int k = j * 3; k < (j + 1) * 3; k++) {
+                                    for (int m = t * 3; m < (t + 1) * 3; m++) {
+                                        if (fixed[k][m] == 1) {
+                                            // if the number is given it cannot be changed
+                                            matrix[k][m] = sudoku[k][m];
+                                            nums = nums + sudoku[k][m];
+                                        }
+                                    }
+                                }
+                                for (int k = j * 3; k < (j + 1) * 3; k++) {
+                                    for (int m = t * 3; m < (t + 1) * 3; m++) {
+                                        if (!(fixed[k][m] == 1)) {
+                                            // the empty cells are filled with generated values
+                                            matrix[k][m] = generateNum(nums);
+                                            nums = nums + matrix[k][m];
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        population[i] = matrix;
+                    }
+
+                    // variables that will be used inside the generation loop
+                    int epsilon = 1;
+                    int badIterations = 0;
+                    int bestResult = 10000;
+                    int difference = 10000000;
+                    int iterations = 0;
+
+                    // a parameter that states how many successful iterations can there be
+                    // after this limit the algorithm should restart with a new population
+                    int maxNumOfIterations = 1000000000;
+
+                    boolean generation = true;
+                    boolean testInternal = true;
+
+                    // the main loop for the algorithm
+                    while (generation && testInternal) {
+
+                        numOfIterations += 1;
+
+                        globalIterations += 1;
+//                        System.out.println(globalIterations);
+
+
+                        if (globalIterations >= maxValue) {
+                            testInternal = false;
+                        }
+
+                        iterations += 1;
+                        int oldResult = bestResult;
+
+                        // array that will contain indexes for each fitness
+                        // it will help with computations later
+                        ArrayList<ArrayList<Integer>> forEachFitness = new ArrayList<>();
+
+                        // calculating fitness function for current population
+                        // and filling in the results
+                        int[] results = new int[populationSize];
+                        int indexOfAnswer = -1;
+                        int currentMinResult = 1000000000;
+                        int currentWorstResult = 0;
+                        for (int i = 0; i < populationSize; i++) {
+                            results[i] = fitnessFunction(population[i], fixed);
+                            while (forEachFitness.size() - 1 < results[i]) {
+                                ArrayList<Integer> indexes = new ArrayList<>();
+                                forEachFitness.add(indexes);
+                            }
+                            forEachFitness.get(results[i]).add(i);
+                            // currentWorstResult shows the worst result in the current population
+                            // it will help to choose the fittest parents later
+                            if (results[i] > currentWorstResult) {
+                                currentWorstResult = results[i];
+                            }
+                            // calculating the best result in the population
+                            if (results[i] < currentMinResult) {
+                                currentMinResult = results[i];
+                            }
+                            // updating the global best result
+                            if (results[i] < bestResult) {
+                                bestResult = results[i];
+                                indexOfAnswer = i;
+                            }
+                        }
+
+                        // calculating the difference between the last best result and a new one
+                        difference = Math.abs(oldResult - bestResult);
+
+                        // case when the sudoku has been solved
+                        if (bestResult == 0) {
+                            for (int i = 0; i < populationSize; i++) {
+                                averageFit += results[i];
+                            }
+                            if (bestResult > globalBest) {
+                                globalBest = bestResult;
+                            }
+                            generation = false;
+                            test = false;
+                            System.out.println();
+                            System.out.println("Test " + (q + 1) + " for " + e + " given values");
+                            System.out.println("Sudoku:");
+                            for (int i = 0; i < 9; i++) {
+                                for (int j = 0; j < 9; j++) {
+                                    System.out.print(sudoku[i][j] + " ");
+                                }
+                                System.out.print("\n");
+                            }
+                            System.out.println();
+
+                            System.out.println("Answer:");
+                            for (int k = 0; k < 9; k++) {
+                                for (int j = 0; j < 9; j++) {
+                                    if (j == 8) {
+                                        System.out.print(population[indexOfAnswer][k][j]);
+                                    } else {
+                                        System.out.print(population[indexOfAnswer][k][j] + " ");
+                                    }
+                                }
+                                if (k != 8) {
+                                    System.out.print("\n");
+                                }
+                            }
+                            System.out.println();
+                        }
+
+                        boolean newPopulation = false;
+
+                        // if the algorithm did not finish
+                        if (bestResult != 0) {
+                            // start over if the algorithm has reached the local optimum or made too many iterations
+                            if (difference < epsilon || oldResult < bestResult) {
+                                badIterations += 1;
+                                if (badIterations >= badLimit || iterations >= maxNumOfIterations) {
+                                    newPopulation = true;
+                                    iterations = 1;
+                                    badIterations = 0;
+                                    // start again with new population
+                                    bestResult = 10000;
+                                    difference = 10000000;
+                                    // build the initial population again
+                                    population = new String[populationSize][9][9];
+                                    for (int i = 0; i < populationSize; i++) {
+                                        String[][] matrix = new String[9][9];
+                                        for (int j = 0; j < 3; j++) {
+                                            for (int t = 0; t < 3; t++) {
+                                                String nums = "";
+                                                for (int k = j * 3; k < (j + 1) * 3; k++) {
+                                                    for (int m = t * 3; m < (t + 1) * 3; m++) {
+                                                        if (fixed[k][m] == 1) {
+                                                            matrix[k][m] = sudoku[k][m];
+                                                            nums = nums + sudoku[k][m];
+                                                        }
+                                                    }
+                                                }
+                                                for (int k = j * 3; k < (j + 1) * 3; k++) {
+                                                    for (int m = t * 3; m < (t + 1) * 3; m++) {
+                                                        if (!(fixed[k][m] == 1)) {
+                                                            matrix[k][m] = generateNum(nums);
+                                                            nums = nums + matrix[k][m];
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        population[i] = matrix;
+                                    }
+                                }
+                            } else {
+                                badIterations -= 1;
+                            }
+
+                            // we continue with the next step if the population has not been restarted
+                            if (!newPopulation) {
+                                // choose 60% of the population as parents based on their fitness
+                                double numberOfParents = ((double) populationSize) / 100 * 60;
+                                int numPar = (int) numberOfParents;
+                                int[] parents = new int[numPar];
+                                boolean f = true;
+                                int count = 0;
+                                // the needed number of parents will be chosen for crossover
+                                for (int i = bestResult; i <= currentWorstResult; i++) {
+                                    if (f) {
+                                        if (!forEachFitness.get(i).isEmpty()) {
+                                            for (Integer num : forEachFitness.get(i)) {
+                                                parents[count] = num;
+                                                count += 1;
+                                                if (count == numPar) {
+                                                    f = false;
+                                                    i = currentWorstResult + 1;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // array for the new population of children
+                                String[][][] childrenPopulationBefMut = new String[populationSize][9][9];
+                                // apply crossover until the number of children reaches the size of the population
+                                int counter = 0;
+                                boolean flag = true;
+                                for (int i = 0; i < numPar; i++) {
+                                    if (flag) {
+                                        for (int j = i + 1; j < numPar; j++) {
+                                            if (counter < populationSize) {
+                                                int index1 = parents[i];
+                                                int index2 = parents[j];
+                                                childrenPopulationBefMut[counter] = crossover(population[index1], population[index2], fixed);
+                                            } else {
+                                                flag = false;
+                                                break;
+                                            }
+                                            counter += 1;
+                                        }
+                                    } else {
+                                        break;
+                                    }
+                                }
+
+
+                                String[][][] childrenPopulation = new String[populationSize][9][9];
+                                // now we can mutate the children to keep the population diverse
+                                for (int i = 0; i < populationSize; i++) {
+                                    childrenPopulation[i] = mutate(childrenPopulationBefMut[i], fixed, bestResult, numberOfMutationsWithGoodFitness, fitnessToChangeTheNumberOfMutations);
+                                }
+
+                                // work with the new population in the next iteration
+                                population = childrenPopulation;
+
+                            }
+                        }
+                    }
+                }
+            }
+            averageFitness[globalCounter] = averageFit/(tests*populationSize);
+            iterationGlobal[globalCounter] = numOfIterations/10;
+            bestFitness[globalCounter] = globalBest;
+            globalCounter += 1;
+        }
+        System.out.println();
+        System.out.println("Average Fitness Function result and the Average Number of Iterations");
+        System.out.println();
+        for (int i = 0; i < 5; i++) {
+            System.out.println("With given " + (20 + i*5) + " values");
+            System.out.println("Fitness: " + averageFitness[i] + ", iterations: " + iterationGlobal[i]);
+            System.out.println();
+        }
+        System.out.println("--------------------------");
+
+        System.out.println("Best Fitness (fitness 0 means that the sudoku has no conflicts)");
+        System.out.println();
+        for (int i = 0; i < 5; i++) {
+            System.out.println("With given " + (20 + i*5) + " values");
+            System.out.println(bestFitness[i] + " ");
+            System.out.println();
+        }
+        System.out.println();
+
+        XYChart chart1 = new XYChartBuilder()
+                .title("AI assignment2 statistics. Veronika Levasheva")
+                .xAxisTitle("# of givens")
+                .yAxisTitle("Average fitness function results")
+                .build();
+
+        chart1.addSeries("Fitness function result average", new int[]{20, 25, 30, 35, 40}, averageFitness);
+
+
+        JPanel chartPanel1 = new XChartPanel<>(chart1);
+        JFrame frame1 = new JFrame("Statistic. Average fitness function results");
+        frame1.add(chartPanel1);
+        frame1.setSize(800, 600);
+        frame1.show();
+
+        XYChart chart2 = new XYChartBuilder()
+                .title("AI assignment2 statistics. Veronika Levasheva")
+                .xAxisTitle("# of givens")
+                .yAxisTitle("Average number of iterations")
+                .build();
+
+        chart2.addSeries("Iterations", new int[]{20, 25, 30, 35, 40}, iterationGlobal);
+
+
+        JPanel chartPanel2 = new XChartPanel<>(chart2);
+        JFrame frame2 = new JFrame("Statistic. Average number of iterations");
+        frame2.add(chartPanel2);
+        frame2.setSize(800, 600);
+        frame2.show();
+
+        XYChart chart3 = new XYChartBuilder()
+                .title("AI assignment2 statistics. Veronika Levasheva")
+                .xAxisTitle("# of givens")
+                .yAxisTitle("Best fitness function result")
+                .build();
+
+        chart3.addSeries("Best result", new int[]{20, 25, 30, 35, 40}, bestFitness);
+
+
+        JPanel chartPanel3 = new XChartPanel<>(chart3);
+        JFrame frame3 = new JFrame("Statistic. Best fitness function result");
+        frame3.add(chartPanel3);
+        frame3.setSize(800, 600);
+        frame3.show();
+    }
+
+    // function to randomly fill in the cell
+    public static String generateNum(String usedNumbs) {
+        String nums = "123456789";
+        Random random = new Random();
+        boolean flag = true;
+        while (flag) {
+            String newNum = String.valueOf(nums.charAt((int) (random.nextFloat() * nums.length())));
+            // check that the number is not in the subgrid yet
+            if (!usedNumbs.contains(newNum)) {
+                return newNum;
+            }
+        }
+        return null;
+    }
+
+    // function to access the fitness of the individual solution
+    public static int fitnessFunction(String[][] matrix, int[][] fixed) {
+
+        // an array with all fixed numbers for rows
+        String[] fixedForRows = new String[9];
+        for (int i = 0; i < 9; i++) {
+            String fix = "";
+            for (int j = 0; j < 9; j++) {
+                if (fixed[i][j] == 1) {
+                    fix = fix + matrix[i][j];
+                }
+            }
+            fixedForRows[i] = fix;
+        }
+
+        // an array with all fixed numbers for columns
+        String[] fixedForColumns = new String[9];
+        for (int j = 0; j < 9; j++) {
+            String fix = "";
+            for (int i = 0; i < 9; i++) {
+                if (fixed[i][j] == 1) {
+                    fix = fix + matrix[i][j];
+                }
+            }
+            fixedForColumns[j] = fix;
+        }
+
+        // count the number of conflicts in the rows
+        int rowConflicts = 0;
+        for (int i = 0; i < 9; i++) {
+            Set<String> usedNums = new HashSet<>();
+            for (int k = 0; k < fixedForRows[i].length(); k++) {
+                usedNums.add(String.valueOf(fixedForRows[i].charAt(k)));
+            }
+            for (int j = 0; j < 9; j++) {
+                if (!usedNums.isEmpty() && usedNums.contains(matrix[i][j]) && fixed[i][j] != 1) {
+                    // add two if there is a conflict with the fixed cell
+                    // add one if the cell repeats an ordinary cell
+                    if (fixedForRows[i].contains(matrix[i][j])) {
+                        rowConflicts += 2;
+                    } else {
+                        rowConflicts += 1;
+                    }
+                }
+                if (fixed[i][j] != 1) {
+                    usedNums.add(matrix[i][j]);
+                }
+            }
+        }
+
+        // count the number of conflicts in the columns
+        int columnConflicts = 0;
+        for (int j = 0; j < 9; j++) {
+            Set<String> usedNums = new HashSet<>();
+            for (int k = 0; k < fixedForColumns[j].length(); k++) {
+                usedNums.add(String.valueOf(fixedForColumns[j].charAt(k)));
+            }
+            for (int i = 0; i < 9; i++) {
+                if (!usedNums.isEmpty() && usedNums.contains(matrix[i][j]) && fixed[i][j] != 1) {
+                    // add two if there is a conflict with the fixed cell
+                    // add one if the cell repeats an ordinary cell
+                    if (fixedForColumns[j].contains(matrix[i][j])) {
+                        columnConflicts += 2;
+                    } else {
+                        columnConflicts += 1;
+                    }
+                }
+                if (fixed[i][j] != 1) {
+                    usedNums.add(matrix[i][j]);
+                }
+            }
+        }
+
+        // the value of the fitness function is the sum of the squares of conflicts
+        return rowConflicts * rowConflicts + columnConflicts * columnConflicts;
+    }
+
+    // function for the crossover between the two parents
+    public static String[][] crossover(String[][] firstParent, String[][] secondParent, int[][] fixed) {
+        Random random = new Random();
+        String[][] child = new String[9][9];
+        int variance = 0;
+        int onlyParent = 0;
+        // randomly choose a parent for each subgrid of a child
+        for (int j = 0; j < 3; j++) {
+            for (int t = 0; t < 3; t++) {
+                int chosenParent = random.nextInt(2);
+                if (chosenParent == 0) {
+                    for (int k = j * 3; k < (j + 1) * 3; k++) {
+                        for (int m = t * 3; m < (t + 1) * 3; m++) {
+                            child[k][m] = firstParent[k][m];
+                            variance += 1;
+                            onlyParent = 1;
+                        }
+                    }
+                } else {
+                    for (int k = j * 3; k < (j + 1) * 3; k++) {
+                        for (int m = t * 3; m < (t + 1) * 3; m++) {
+                            child[k][m] = secondParent[k][m];
+                            variance += 1;
+                            onlyParent = 2;
+                        }
+                    }
+                }
+            }
+        }
+
+        // case when the child took after only the first parent in all subgrids
+        if (variance == 1 && onlyParent == 1) {
+            boolean notFixed = true;
+            while (notFixed) {
+                int j = random.nextInt(3);
+                int t = random.nextInt(3);
+                for (int k = j * 3; k < (j + 1) * 3; k++) {
+                    for (int m = t * 3; m < (t + 1) * 3; m++) {
+                        child[k][m] = secondParent[k][m];
+                    }
+                }
+            }
+        }
+        // case when the child took after only the second parent in all subgrids
+        if (variance == 1 && onlyParent == 2) {
+            boolean notFixed = true;
+            while (notFixed) {
+                int j = random.nextInt(3);
+                int t = random.nextInt(3);
+                for (int k = j * 3; k < (j + 1) * 3; k++) {
+                    for (int m = t * 3; m < (t + 1) * 3; m++) {
+                        child[k][m] = firstParent[k][m];
+                    }
+                }
+            }
+        }
+        return child;
+    }
+
+    // function for mutation
+    public static String[][] mutate(String[][] child, int[][] fixed, int bestResult, int basicNumMut, int limit) {
+        int numberOfMutations = 2;
+        Random random = new Random();
+        int mut = random.nextInt(5);
+        numberOfMutations = mut;
+        // change the number of mutations is the fitness is high
+        // (but it cannot be zero)
+        if (bestResult < limit) {
+            numberOfMutations = basicNumMut;
+        }
+        for (int i = 0; i < numberOfMutations; i++) {
+            boolean fixedCells = true;
+            while (fixedCells) {
+                // randomly choose a subgrid for mutation
+                int j = random.nextInt(3);
+                int t = random.nextInt(3);
+                // randomly choose the first cell for swapping
+                int index1 = random.nextInt((j + 1) * 3 - j * 3) + j * 3;
+                int index2 = random.nextInt((t + 1) * 3 - t * 3) + t * 3;
+                int d = 0;
+                int w = 0;
+                boolean flag = true;
+                while (flag) {
+                    // choose the second cell for swapping
+                    d = random.nextInt((j + 1) * 3 - j * 3) + j * 3;
+                    w = random.nextInt((t + 1) * 3 - t * 3) + t * 3;
+                    if (d != index1 || w != index2) {
+                        flag = false;
+                    }
+                }
+                // swap the cells within the subgrid if the cells are not fixed
+                if (fixed[index1][index2] != 1 && fixed[d][w] != 1) {
+                    String num = child[index1][index2];
+                    child[index1][index2] = child[d][w];
+                    child[d][w] = num;
+                    fixedCells = false;
+                }
+
+            }
+        }
+        return child;
+    }
+}
+
+class Triple{
+    ArrayList<Integer> firstElement;
+    ArrayList<Integer> secondElement;
+    ArrayList<Integer> thirdElement;
+
+    public Triple(ArrayList<Integer> first, ArrayList<Integer> second, ArrayList<Integer> third) {
+        this.firstElement = first;
+        this.secondElement = second;
+        this.thirdElement = third;
+
+    }
+
+    public ArrayList<Integer> getFirstElement() {
+        return firstElement;
+    }
+
+    public ArrayList<Integer> getSecondElement() {
+        return secondElement;
+    }
+
+    public ArrayList<Integer> getThirdElement() {
+        return thirdElement;
+    }
+}
