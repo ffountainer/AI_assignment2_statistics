@@ -21,15 +21,17 @@ public class Main {
 
         // generating tests and running them
 
-        int[] averageFitness = new int[5];
-        int[] bestFitness = new int[5];
-        int[] iterationGlobal = new int[5];
+        int numberOfValues = 21;
+
+        int[] averageFitness = new int[21];
+        int[] bestFitness = new int[21];
+        int[] iterationGlobal = new int[21];
 
         // NUMBER OF TESTS FOR EACH COMPLEXITY
         int tests = 10;
 
         int globalCounter = 0;
-        for (int e = 20; e <= 40; e += 5) {
+        for (int e = 20; e <= 40; e += 1) {
             Integer averageFit = 0;
             Integer globalBest = -1000000;
             Integer numOfIterations = 0;
@@ -495,8 +497,8 @@ public class Main {
         System.out.println();
         System.out.println("Average Fitness Function result and the Average Number of Iterations");
         System.out.println();
-        for (int i = 0; i < 5; i++) {
-            System.out.println("With given " + (20 + i*5) + " values");
+        for (int i = 0; i < 21; i++) {
+            System.out.println("With given " + (20 + i) + " values");
             System.out.println("Fitness: " + averageFitness[i] + ", iterations: " + iterationGlobal[i]);
             System.out.println();
         }
@@ -504,8 +506,8 @@ public class Main {
 
         System.out.println("Best Fitness (fitness 0 means that the sudoku has no conflicts)");
         System.out.println();
-        for (int i = 0; i < 5; i++) {
-            System.out.println("With given " + (20 + i*5) + " values");
+        for (int i = 0; i < 21; i++) {
+            System.out.println("With given " + (20 + i) + " values");
             System.out.println(bestFitness[i] + " ");
             System.out.println();
         }
@@ -517,7 +519,7 @@ public class Main {
                 .yAxisTitle("Average fitness function results")
                 .build();
 
-        chart1.addSeries("Fitness function result average", new int[]{20, 25, 30, 35, 40}, averageFitness);
+        chart1.addSeries("Fitness function result average", new int[]{20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40}, averageFitness);
 
 
         JPanel chartPanel1 = new XChartPanel<>(chart1);
@@ -532,7 +534,7 @@ public class Main {
                 .yAxisTitle("Average number of iterations")
                 .build();
 
-        chart2.addSeries("Iterations", new int[]{20, 25, 30, 35, 40}, iterationGlobal);
+        chart2.addSeries("Iterations", new int[]{20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40}, iterationGlobal);
 
 
         JPanel chartPanel2 = new XChartPanel<>(chart2);
@@ -547,7 +549,7 @@ public class Main {
                 .yAxisTitle("Best fitness function result")
                 .build();
 
-        chart3.addSeries("Best result", new int[]{20, 25, 30, 35, 40}, bestFitness);
+        chart3.addSeries("Best result", new int[]{20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40}, bestFitness);
 
 
         JPanel chartPanel3 = new XChartPanel<>(chart3);
